@@ -1,0 +1,34 @@
+version: "3.7"
+
+networks:
+  dbbridge:
+    external: true
+    driver: bridge
+
+  web:
+    external: true  
+
+
+services:
+  nextcloud:
+    image: nextcloud:21
+    container_name: nextcloud
+    hostname: nextcloud
+    user: 1000:966
+    restart: unless-stopped
+    networks:
+      - dbbridge
+      - web
+    #ports:
+      #- 80:80
+
+    volumes:
+      - /docker/mounts/nextcloud:/var/www/html/data:rw
+    #environment:
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nc.rule=Host(`nc.thallheim.eu`)
+      - traefik.http.routers.nc.tls=true
+      - traefik.http.routers.nc.tls.certresolver=letsencrypt
+      - traefik.port=80

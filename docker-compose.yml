@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.5.0
+    container_name: traefik
+    #user: 1000:966
+    ports:
+      - 80:80
+      - 443:443
+      - :8090
+      - :8085
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme.json:/acme.json
+      - ./traefik.toml:/traefik.toml
+      - ./traefik_dynamic.toml:/traefik_dynamic.toml
+    networks:
+      - web
+    command:
+      - --log.level=debug
+    labels:
+      - traefik.enable=true 
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    user: 1000:966
+    environment:
+      MYSQL_ROOT_PASSWORD: {hush}
+    networks:
+      - dbbridge
+    volumes:
+      - /docker/mounts/mysql:/var/lib/mysql  
+    labels:
+      - traefik.enable=true
+
+### Set up but not used (not really needed for myself)
+#  adminer:
+#    image: adminer:4.6.3-standalone
+#    container_name: adminer
+#    #user: 1000:966
+#    environment:
+#      ADMINER_DEFAULT_SERVER: mysql
+#    labels:
+#      - traefik.http.routers.adminer.rule=Host(`{hush}`)
+#      - traefik.http.routers.adminer.tls=true
+#      - traefik.http.routers.adminer.tls.certresolver=letsencrypt
+#      - traefik.port=8080
+#    networks:
+#      - internal
+#      - web
+#    depends_on:
+#      - mysql
+
+networks:
+  web:
+    external: true
+  dbbridge:
+    external: true    
+ 

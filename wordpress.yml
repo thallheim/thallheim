@@ -1,0 +1,30 @@
+version: '3'
+
+networks:
+  web:
+    external: true
+  dbbridge:
+    external: true        
+
+services:
+
+  wp:
+    image: wordpress:4.9.8-apache
+    container_name: wordpress
+    user: 1000:966
+    environment:
+      WORDPRESS_DB_USER: root
+      
+    volumes:
+      - /docker/mounts/wordpress:/var/www/html/
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wp.rule=Host(`thallheim.eu`)
+      - traefik.http.routers.wp.tls=true
+      - traefik.http.routers.wp.tls.certresolver=letsencrypt
+      - traefik.port=80
+    networks:
+      - web
+      - dbbridge
+    depends_on:
+      - mysql 

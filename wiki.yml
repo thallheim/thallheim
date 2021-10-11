@@ -1,0 +1,35 @@
+version: "3.7"
+networks:
+  internal:
+    external: false
+    driver: bridge
+
+  web:
+    external: true  
+
+services:
+  wiki:
+    image: mazzolino/tiddlywiki
+    user: 1000:966
+    container_name: wiki
+    networks:
+      - internal
+      - web
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Stockholm
+      - USERNAME=$USERNAME
+      - PASSWORD=$PASSWORD
+    volumes:
+      - ./mounts/wiki/:/var/lib/tiddlywiki
+    ports:
+      - 8093:8093
+    restart: unless-stopped
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wiki.rule=Host(`{hush}`)
+      - traefik.http.routers.wiki.tls=true
+      - traefik.http.routers.wiki.tls.certresolver=letsencrypt
+      - traefik.port=80
